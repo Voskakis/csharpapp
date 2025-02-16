@@ -11,7 +11,11 @@ public static class HttpConfiguration
     {
         var restApiSettings = services.BuildServiceProvider().GetRequiredService<IOptions<RestApiSettings>>().Value;
         var httpClientSettings = services.BuildServiceProvider().GetRequiredService<IOptions<HttpClientSettings>>().Value;
+
         services.AddHttpClient<IProductsService, ProductsService>(ConfigureHttpClient(restApiSettings, httpClientSettings, restApiSettings.Products!))
+            .AddPolicyHandler(PolicySelector(httpClientSettings));
+
+        services.AddHttpClient<ICategoriesService, CategoriesService>(ConfigureHttpClient(restApiSettings, httpClientSettings, restApiSettings.Categories!))
             .AddPolicyHandler(PolicySelector(httpClientSettings));
 
         return services;

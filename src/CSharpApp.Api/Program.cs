@@ -20,6 +20,8 @@ if (app.Environment.IsDevelopment())
 
 var versionedEndpointRouteBuilder = app.NewVersionedApi();
 
+#region products
+
 versionedEndpointRouteBuilder.MapGet("api/v{version:apiVersion}/getproducts", async (IProductsService productsService) =>
     {
         var products = await productsService.GetProducts();
@@ -43,5 +45,34 @@ versionedEndpointRouteBuilder.MapPost("api/v{version:apiVersion}/addproduct", as
 })
     .WithName("AddProduct")
     .HasApiVersion(1.0);
+#endregion
+
+#region categories
+
+versionedEndpointRouteBuilder.MapGet("api/v{version:apiVersion}/getcategories", async (ICategoriesService categoriesService) =>
+{
+    var categories = await categoriesService.GetCategories();
+    return categories;
+})
+    .WithName("GetCategories")
+    .HasApiVersion(1.0);
+
+versionedEndpointRouteBuilder.MapGet("api/v{version:apiVersion}/getcategories/{id:int}", async (int id, ICategoriesService categoriesService) =>
+{
+    var category = await categoriesService.GetCategoryById(id);
+    return category != null ? Results.Ok(category) : Results.NotFound();
+})
+    .WithName("GetCategoryById")
+    .HasApiVersion(1.0);
+
+versionedEndpointRouteBuilder.MapPost("api/v{version:apiVersion}/addcategory", async (CreateCategory category, ICategoriesService categoriesService) =>
+{
+    var createdCategory = await categoriesService.AddCategory(category);
+    return Results.Created("api/v1.0/addcategory", createdCategory);
+})
+    .WithName("AddCategory")
+    .HasApiVersion(1.0);
+#endregion
+
 
 app.Run();
