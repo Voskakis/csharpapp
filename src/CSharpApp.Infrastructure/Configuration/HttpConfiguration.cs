@@ -28,7 +28,7 @@ public static class HttpConfiguration
     {
         return (serviceProvider, client) =>
         {
-            client.BaseAddress = new Uri(restApiSettings.BaseUrl! + path);
+            client.BaseAddress = new Uri(restApiSettings.BaseUrl! + path + "/");
             client.Timeout = TimeSpan.FromSeconds(httpClientSettings.LifeTime);
         };
     }
