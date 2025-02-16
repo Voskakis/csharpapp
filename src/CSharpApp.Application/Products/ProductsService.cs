@@ -5,7 +5,7 @@ public class ProductsService : IProductsService
     private readonly HttpClient _httpClient;
     private readonly ILogger<ProductsService> _logger;
 
-    public ProductsService(IOptions<RestApiSettings> restApiSettings, ILogger<ProductsService> logger, HttpClient client)
+    public ProductsService(ILogger<ProductsService> logger, HttpClient client)
     {
         _httpClient = client;
         _logger = logger;
