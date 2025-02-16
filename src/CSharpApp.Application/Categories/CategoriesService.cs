@@ -1,20 +1,42 @@
-﻿namespace CSharpApp.Application.Categories
+﻿using System.Text;
+
+namespace CSharpApp.Application.Categories
 {
     public class CategoriesService : ICategoriesService
     {
-        public Task<Category> AddCategory(CreateCategory category)
+        private readonly HttpClient _httpClient;
+        private readonly ILogger<CategoriesService> _logger;
+
+        public CategoriesService(HttpClient httpClient, ILogger<CategoriesService> logger)
         {
-            throw new NotImplementedException();
+            _httpClient = httpClient;
+            _logger = logger;
         }
 
-        public Task<IReadOnlyCollection<Category>> GetCategories()
+        public async Task<Category> AddCategory(CreateCategory category)
         {
-            throw new NotImplementedException();
+            using var jsonContent = new StringContent(JsonSerializer.Serialize(category), Encoding.UTF8, "application/json");
+            using var response = await _httpClient.PostAsync(string.Empty, jsonContent);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<Category>(content);
         }
 
-        public Task<Category> GetCategoryById(int id)
+        public async Task<IReadOnlyCollection<Category>> GetCategories()
         {
-            throw new NotImplementedException();
+            using var response = await _httpClient.GetAsync(string.Empty);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            var res = JsonSerializer.Deserialize<List<Category>>(content);
+            return res.AsReadOnly();
+        }
+
+        public async Task<Category> GetCategoryById(int id)
+        {
+            using var response = await _httpClient.GetAsync($"{id}");
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<Category>(content);
         }
     }
 }
