@@ -1,4 +1,5 @@
 using CSharpApp.Core.Dtos;
+using CSharpApp.Infrastructure.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -74,5 +75,6 @@ versionedEndpointRouteBuilder.MapPost("api/v{version:apiVersion}/addcategory", a
     .HasApiVersion(1.0);
 #endregion
 
+app.UseMiddleware<RequestPerformace>();
 
 app.Run();
