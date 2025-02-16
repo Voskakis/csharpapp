@@ -20,4 +20,13 @@ public class ProductsService : IProductsService
 
         return res.AsReadOnly();
     }
+
+    public async Task<Product> GetProductById(int id)
+    {
+        var response = await _httpClient.GetAsync($"{id}");
+        var foo = response.RequestMessage.RequestUri;
+        response.EnsureSuccessStatusCode();
+        var content = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<Product>(content);
+    }
 }
