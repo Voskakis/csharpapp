@@ -11,11 +11,12 @@ public static class HttpConfiguration
     {
         var restApiSettings = services.BuildServiceProvider().GetRequiredService<IOptions<RestApiSettings>>().Value;
         var httpClientSettings = services.BuildServiceProvider().GetRequiredService<IOptions<HttpClientSettings>>().Value;
+        var authService = () => services.BuildServiceProvider().GetRequiredService<IAuthService>();
 
-        services.AddHttpClient<IProductsService, ProductsService>(ConfigureHttpClient(restApiSettings, httpClientSettings, restApiSettings.Products!))
+        services.AddHttpClient<IProductsService, ProductsService>(ConfigureHttpClient(restApiSettings, httpClientSettings, restApiSettings.Products!, authService))
             .AddPolicyHandler(PolicySelector(httpClientSettings));
 
-        services.AddHttpClient<ICategoriesService, CategoriesService>(ConfigureHttpClient(restApiSettings, httpClientSettings, restApiSettings.Categories!))
+        services.AddHttpClient<ICategoriesService, CategoriesService>(ConfigureHttpClient(restApiSettings, httpClientSettings, restApiSettings.Categories!, authService))
             .AddPolicyHandler(PolicySelector(httpClientSettings));
 
         services.AddHttpClient<IAuthService, AuthService>(ConfigureHttpClient(restApiSettings, httpClientSettings, restApiSettings.Auth!))
@@ -40,6 +41,22 @@ public static class HttpConfiguration
             client.Timeout = TimeSpan.FromSeconds(httpClientSettings.LifeTime);
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.DefaultRequestHeaders.UserAgent.ParseAdd("CSharpApp/1.0");
+        };
+    }
+
+    private static Action<IServiceProvider, HttpClient> ConfigureHttpClient(RestApiSettings restApiSettings, HttpClientSettings httpClientSettings, string path, Func<IAuthService> authService)
+    {
+        return (serviceProvider, client) =>
+        {
+            var token = authService.Invoke().GetAccessToken().Result;
+            client.BaseAddress = new Uri(restApiSettings.BaseUrl! + path + "/");
+            client.Timeout = TimeSpan.FromSeconds(httpClientSettings.LifeTime);
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("CSharpApp/1.0");
+            if (token != null)
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
         };
     }
 }
