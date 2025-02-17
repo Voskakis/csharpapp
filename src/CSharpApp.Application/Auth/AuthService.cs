@@ -15,22 +15,24 @@ namespace CSharpApp.Application.Auth
             _restApiSettings = restApiSettings.Value;
         }
 
-        public async Task<string> GetAccessToken()
+        public async Task<AuthResponse> AuthenticateAsync(AuthRequest authRequest, CancellationToken ct)
         {
-            using var jsonContent = new StringContent(JsonSerializer.Serialize(new
-            {
-                email = _restApiSettings.Username,
-                password = _restApiSettings.Password
-            }), Encoding.UTF8, "application/json");
-            using var response = await _httpClient.PostAsync(string.Empty, jsonContent);
+            using var jsonContent = new StringContent(JsonSerializer.Serialize(authRequest), Encoding.UTF8, "application/json");
+            using var response = await _httpClient.PostAsync(_restApiSettings.Auth, jsonContent, ct);
             if (!response.IsSuccessStatusCode)
             {
-                return string.Empty;
+                return new AuthResponse();
             }
-            var content = await response.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<AuthResponse>(content);
+            var content = await response.Content.ReadAsStringAsync(ct);
+            return JsonSerializer.Deserialize<AuthResponse>(content) ?? new AuthResponse();
+        }
 
-            return result?.AccessToken ?? string.Empty;
+        public async Task<UserProfile> GetUserProfileAsync(string accessToken, CancellationToken ct)
+        {
+            var response = await _httpClient.GetAsync(_restApiSettings.Profile, ct);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync(ct);
+            return JsonSerializer.Deserialize<UserProfile>(content);
         }
     }
 }

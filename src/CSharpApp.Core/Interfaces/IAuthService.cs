@@ -2,6 +2,7 @@
 {
     public interface IAuthService
     {
-        Task<string> GetAccessToken();
+        Task<AuthResponse> AuthenticateAsync(AuthRequest authRequest, CancellationToken ct);
+        Task<UserProfile> GetUserProfileAsync(string accessToken, CancellationToken ct);
     }
 }

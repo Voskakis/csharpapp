@@ -15,30 +15,30 @@ public class ProductsService : IProductsService
         _restApiSettings = restApiSettings.Value;
     }
 
-    public async Task<IReadOnlyCollection<Product>> GetProducts()
+    public async Task<IReadOnlyCollection<Product>> GetProducts(CancellationToken ct)
     {
-        var response = await _httpClient.GetAsync(_restApiSettings.Products);
+        var response = await _httpClient.GetAsync(_restApiSettings.Products, ct);
         response.EnsureSuccessStatusCode();
-        var content = await response.Content.ReadAsStringAsync();
+        var content = await response.Content.ReadAsStringAsync(ct);
         var res = JsonSerializer.Deserialize<List<Product>>(content);
 
         return res.AsReadOnly();
     }
 
-    public async Task<Product> GetProductById(int id)
+    public async Task<Product> GetProductById(int id, CancellationToken ct)
     {
-        using var response = await _httpClient.GetAsync($"{_restApiSettings.Products}/{id}");
+        using var response = await _httpClient.GetAsync($"{_restApiSettings.Products}/{id}", ct);
         response.EnsureSuccessStatusCode();
-        var content = await response.Content.ReadAsStringAsync();
+        var content = await response.Content.ReadAsStringAsync(ct);
         return JsonSerializer.Deserialize<Product>(content);
     }
 
-    public async Task<Product> AddProduct(CreateProduct product)
+    public async Task<Product> AddProduct(CreateProduct product, CancellationToken ct)
     {
         using var jsonContent = new StringContent(JsonSerializer.Serialize(product), Encoding.UTF8, "application/json");
-        using var response = await _httpClient.PostAsync(_restApiSettings.Products, jsonContent);
+        using var response = await _httpClient.PostAsync(_restApiSettings.Products, jsonContent, ct);
         response.EnsureSuccessStatusCode();
-        var content = await response.Content.ReadAsStringAsync();
+        var content = await response.Content.ReadAsStringAsync(ct);
         return JsonSerializer.Deserialize<Product>(content);
     }
 }
