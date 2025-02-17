@@ -13,13 +13,13 @@ public static class HttpConfiguration
         var httpClientSettings = services.BuildServiceProvider().GetRequiredService<IOptions<HttpClientSettings>>().Value;
         var authService = () => services.BuildServiceProvider().GetRequiredService<IAuthService>();
 
-        services.AddHttpClient<IProductsService, ProductsService>(ConfigureHttpClient(restApiSettings, httpClientSettings, restApiSettings.Products!, authService))
+        services.AddHttpClient<IProductsService, ProductsService>(ConfigureHttpClient(restApiSettings, httpClientSettings))
             .AddPolicyHandler(PolicySelector(httpClientSettings));
 
-        services.AddHttpClient<ICategoriesService, CategoriesService>(ConfigureHttpClient(restApiSettings, httpClientSettings, restApiSettings.Categories!, authService))
+        services.AddHttpClient<ICategoriesService, CategoriesService>(ConfigureHttpClient(restApiSettings, httpClientSettings))
             .AddPolicyHandler(PolicySelector(httpClientSettings));
 
-        services.AddHttpClient<IAuthService, AuthService>(ConfigureHttpClient(restApiSettings, httpClientSettings, restApiSettings.Auth!))
+        services.AddHttpClient<IAuthService, AuthService>(ConfigureHttpClient(restApiSettings, httpClientSettings))
             .AddPolicyHandler(PolicySelector(httpClientSettings));
 
         return services;
@@ -33,30 +33,30 @@ public static class HttpConfiguration
                     retryAttempt => TimeSpan.FromMilliseconds(httpClientSettings.SleepDuration * retryAttempt));
     }
 
-    private static Action<IServiceProvider, HttpClient> ConfigureHttpClient(RestApiSettings restApiSettings, HttpClientSettings httpClientSettings, string path)
+    private static Action<IServiceProvider, HttpClient> ConfigureHttpClient(RestApiSettings restApiSettings, HttpClientSettings httpClientSettings)
     {
         return (serviceProvider, client) =>
         {
-            client.BaseAddress = new Uri(restApiSettings.BaseUrl! + path + "/");
+            client.BaseAddress = new Uri(restApiSettings.BaseUrl!);
             client.Timeout = TimeSpan.FromSeconds(httpClientSettings.LifeTime);
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.DefaultRequestHeaders.UserAgent.ParseAdd("CSharpApp/1.0");
         };
     }
 
-    private static Action<IServiceProvider, HttpClient> ConfigureHttpClient(RestApiSettings restApiSettings, HttpClientSettings httpClientSettings, string path, Func<IAuthService> authService)
-    {
-        return (serviceProvider, client) =>
-        {
-            var token = authService.Invoke().GetAccessToken().Result;
-            client.BaseAddress = new Uri(restApiSettings.BaseUrl! + path + "/");
-            client.Timeout = TimeSpan.FromSeconds(httpClientSettings.LifeTime);
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("CSharpApp/1.0");
-            if (token != null)
-            {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            }
-        };
-    }
+    //private static Action<IServiceProvider, HttpClient> ConfigureHttpClient(RestApiSettings restApiSettings, HttpClientSettings httpClientSettings, Func<IAuthService> authService)
+    //{
+    //    return (serviceProvider, client) =>
+    //    {
+    //        var token = authService.Invoke().GetAccessToken().Result;
+    //        client.BaseAddress = new Uri(restApiSettings.BaseUrl!);
+    //        client.Timeout = TimeSpan.FromSeconds(httpClientSettings.LifeTime);
+    //        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+    //        client.DefaultRequestHeaders.UserAgent.ParseAdd("CSharpApp/1.0");
+    //        if (token != null)
+    //        {
+    //            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    //        }
+    //    };
+    //}
 }
