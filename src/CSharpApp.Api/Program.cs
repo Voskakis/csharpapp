@@ -21,6 +21,16 @@ if (app.Environment.IsDevelopment())
 
 var versionedEndpointRouteBuilder = app.NewVersionedApi();
 
+#region Auth
+versionedEndpointRouteBuilder.MapPost("api/v{version:apiVersion}/auth/login", async (IAuthService authService) =>
+{
+    var token = await authService.GetAccessToken();
+    return string.IsNullOrEmpty(token) ? Results.Unauthorized() : Results.Ok(new { access_token = token });
+})
+.WithName("Login")
+.HasApiVersion(1.0);
+#endregion
+
 #region products
 
 versionedEndpointRouteBuilder.MapGet("api/v{version:apiVersion}/getproducts", async (IProductsService productsService) =>

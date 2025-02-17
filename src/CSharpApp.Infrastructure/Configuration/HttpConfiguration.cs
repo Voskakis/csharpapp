@@ -18,6 +18,9 @@ public static class HttpConfiguration
         services.AddHttpClient<ICategoriesService, CategoriesService>(ConfigureHttpClient(restApiSettings, httpClientSettings, restApiSettings.Categories!))
             .AddPolicyHandler(PolicySelector(httpClientSettings));
 
+        services.AddHttpClient<IAuthService, AuthService>(ConfigureHttpClient(restApiSettings, httpClientSettings, restApiSettings.Auth!))
+            .AddPolicyHandler(PolicySelector(httpClientSettings));
+
         return services;
     }
 
