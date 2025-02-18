@@ -1,3 +1,4 @@
+using Autofac.Core;
 using CSharpApp.Core.Dtos;
 using CSharpApp.Infrastructure.Middleware;
 using System.Text.Json.Serialization;
@@ -18,6 +19,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddOpenApi();
 builder.Services.AddDefaultConfiguration();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddHttpConfiguration();
 builder.Services.AddProblemDetails();
 builder.Services.AddApiVersioning();
