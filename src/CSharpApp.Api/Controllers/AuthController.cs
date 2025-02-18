@@ -1,4 +1,5 @@
-﻿using CSharpApp.Core.Dtos;
+﻿using CSharpApp.Api.Attributes;
+using CSharpApp.Core.Dtos;
 using CSharpApp.Core.Settings;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -27,6 +28,7 @@ namespace CSharpApp.Api.Controllers
         }
 
         [HttpGet("profile")]
+        [Auth]
         public async Task<IActionResult> Profile(CancellationToken ct)
         {
             return null;

@@ -1,4 +1,5 @@
-﻿using CSharpApp.Core.Dtos;
+﻿using CSharpApp.Api.Attributes;
+using CSharpApp.Core.Dtos;
 using CSharpApp.Core.Settings;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -7,6 +8,7 @@ namespace CSharpApp.Api.Controllers
 {
     [Route("api/v{version:apiVersion}/products")]
     [ApiController]
+    [Auth]
     public class ProductsController : ControllerBase
     {
         private readonly ILogger<ProductsController> _logger;

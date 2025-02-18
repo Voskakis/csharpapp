@@ -34,5 +34,6 @@ var _ = app.NewVersionedApi();
 app.UseMiddleware<RequestPerformace>();
 
 app.MapControllers();
+app.UseAuthentication();
 
 app.Run();
